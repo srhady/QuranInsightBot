@@ -1,7 +1,7 @@
 # 🌙 Quranic Insights - AI-Powered Automated Islamic Telegram Bot
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
-![Gemini AI](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-orange.svg)
+![Gemini AI](https://img.shields.io/badge/AI-Gemini%203%20Flash-orange.svg)
 ![Telegram API](https://img.shields.io/badge/Telegram-Bot%20API-blue.svg)
 ![GitHub Actions](https://img.shields.io/badge/Automation-GitHub%20Actions-green.svg)
 

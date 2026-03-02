@@ -1,30 +1,30 @@
-name: News Bot 24/7
+name: Auto Telegram Post
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
   schedule:
-    - cron: '0 */5 * * *' # প্রতি ৫ ঘণ্টা পরপর রিস্টার্ট হবে
+    # গিটহাব UTC টাইম মেনে চলে। বাংলাদেশ সময় সকাল ১০টা মানে UTC 04:00 এবং রাত ৮টা মানে UTC 14:00
+    - cron: '0 4,14 * * *'
+  workflow_dispatch: # এই লাইনের কারণে আপনি চাইলে ম্যানুয়ালিও রান করতে পারবেন
 
 jobs:
-  run-bot:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Start Bot
+      - name: Run Python Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        run: python news_bot_smart.py
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+        run: python main.py

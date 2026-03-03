@@ -2,11 +2,15 @@ name: Auto Telegram Post
 
 on:
   schedule:
-    # বাংলাদেশ সময় সকাল ৯:১৮, সন্ধ্যা ৬:০৭ এবং রাত ১০:১১
+    # গিটহাব UTC সময় মেনে চলে (বাংলাদেশ সময় থেকে ৬ ঘণ্টা বিয়োগ)
+    # সকাল ০৯:১৮ BST = 03:18 UTC
     - cron: '18 3 * * *'
+    # সন্ধ্যা ০৬:০৭ BST = 12:07 UTC
     - cron: '7 12 * * *'
+    # রাত ১০:১১ BST = 16:11 UTC
     - cron: '11 16 * * *'
- workflow_dispatch: # এই লাইনের কারণে আপনি চাইলে ম্যানুয়ালিও রান করতে পারবেন
+    
+  workflow_dispatch: # এটি আপনাকে ম্যানুয়ালি রান করার অপশন দেবে
 
 jobs:
   build:
@@ -22,7 +26,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          # যদি রিকোয়ারমেন্ট ফাইল থাকে তবে ইন্সটল হবে
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # অথবা সরাসরি প্রয়োজনীয় লাইব্রেরি এখানে লিখতে পারেন
+          # pip install python-telegram-bot google-generativeai 
 
       - name: Run Python Script
         env:

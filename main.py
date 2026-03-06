@@ -10,6 +10,7 @@ CHANNEL_ID = os.environ.get("CHANNEL_ID")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
 TELEGRAM_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 HISTORY_FILE = "history.txt"
+POST_NUMBER_FILE = "post_number.txt" # নতুন ট্র্যাকার
 
 # বিশাল এবং বৈচিত্র্যময় ক্যাটাগরি লিস্ট (মোট ২৩টি)
 categories = [
@@ -38,11 +39,10 @@ categories = [
     "ইসলামের ঐতিহাসিক যুদ্ধসমূহ (বদর, ওহুদ, খন্দক) এবং এর কৌশলগত শিক্ষা"
 ]
 
-# মেমোরি থেকে সবগুলো টপিক পড়ার ফাংশন (লিমিট তুলে দেওয়া হয়েছে)
+# মেমোরি থেকে সবগুলো টপিক পড়ার ফাংশন
 def read_history():
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-            # সবগুলো টপিক মনে রাখবে, কোনো লিমিট নেই!
             return f.read().splitlines()
     return []
 
@@ -51,15 +51,33 @@ def save_history(title):
     with open(HISTORY_FILE, "a", encoding="utf-8") as f:
         f.write(title + "\n")
 
+# 📌 পোস্ট নাম্বার ম্যানেজ করার নতুন ফাংশন
+def get_and_update_post_number():
+    if os.path.exists(POST_NUMBER_FILE):
+        with open(POST_NUMBER_FILE, "r", encoding="utf-8") as f:
+            num = int(f.read().strip())
+    else:
+        num = 19 # প্রথমবার ১৯ থেকে শুরু হবে
+        
+    # পরের বারের জন্য নাম্বার ১ বাড়িয়ে সেভ করে রাখা
+    with open(POST_NUMBER_FILE, "w", encoding="utf-8") as f:
+        f.write(str(num + 1))
+        
+    return num
+
 def generate_and_post():
     category = random.choice(categories)
     seed = random.randint(100000, 999999) 
     past_topics = read_history()
     
+    # হিস্ট্রি ফাইলের হিসেব বাদ দিয়ে সরাসরি ট্র্যাকার থেকে নাম্বার নিচ্ছে
+    post_number = get_and_update_post_number()
+    
     # এআই-কে আগের টপিকগুলোর কথা মনে করিয়ে দেওয়া
     history_text = ", ".join(past_topics) if past_topics else "এখনো কোনো পোস্ট করা হয়নি।"
     
     print(f"📁 আজকের ক্যাটাগরি: {category}")
+    print(f"🔢 পোস্ট নাম্বার: {post_number}")
     
     prompt = f"""
     তুমি একজন বিজ্ঞ ইসলামিক স্কলার। আমি তোমাকে একটি ক্যাটাগরি দিচ্ছি: '{category}'। 
@@ -92,9 +110,12 @@ def generate_and_post():
             # ক্লিনআপ: AI ভুল করে <br> ট্যাগ দিলেও তা সাধারণ নিউ লাইনে রূপান্তর হবে
             post_text = raw_text.replace('```html', '').replace('```', '').replace('<br>', '\n').replace('<br/>', '\n')
             
+            # 📌 এখানে পোস্টের একদম শুরুতে পোস্ট নাম্বার যুক্ত করা হচ্ছে
+            final_post_text = f"<b>পোস্ট নং: {post_number}</b>\n\n{post_text}"
+            
             tg_payload = {
                 "chat_id": CHANNEL_ID,
-                "text": post_text,
+                "text": final_post_text,
                 "parse_mode": "HTML"
             }
             
@@ -102,7 +123,7 @@ def generate_and_post():
             tg_data = tg_response.json()
             
             if tg_data.get("ok"):
-                print("🎉 পোস্ট সফলভাবে পাবলিশ হয়েছে!")
+                print(f"🎉 পোস্ট নং {post_number} সফলভাবে পাবলিশ হয়েছে!")
                 
                 # পোস্টের প্রথম লাইনটি (শিরোনাম) মেমোরিতে সেভ করে রাখা
                 title = post_text.strip().split('\n')[0].replace('<b>', '').replace('</b>', '').strip()

@@ -42,6 +42,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add history.txt
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update topic history"
+          # 📌 এখানে history.txt এর সাথে post_number.txt যোগ করা হয়েছে
+          git add history.txt post_number.txt
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update topic history and post number"
           git push
